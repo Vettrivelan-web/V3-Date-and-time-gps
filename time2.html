@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V3 Date Time Editor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 15px; background-color: #f0f2f5; color: #333; line-height: 1.5;
+        }
+        h1 { color: #1c1e21; text-align: center; margin-bottom: 25px; }
+        h2 { color: #333; text-align: center; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .container { max-width: 700px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        div.input-group { margin-bottom: 18px; background-color: #fff; padding: 0; border-radius: 5px; display: flex; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        div.input-group:last-of-type { border-bottom: none; }
+        label { display: inline-block; width: 130px; margin-right: 15px; vertical-align: middle; font-weight: 600; color: #4b4f56; font-size: 0.95em; }
+        input[type="file"], input[type="date"], input[type="time"], input[type="number"] {
+            padding: 10px; border: 1px solid #ccd0d5; border-radius: 6px; vertical-align: middle; box-sizing: border-box; flex-grow: 1; font-size: 1em; transition: border-color 0.2s ease-in-out;
+        }
+        input:focus { border-color: #007bff; outline: none; }
+        input[type="file"] { border: none; background-color: #f5f6f7; padding: 10px; cursor: pointer; }
+        input[type="file"]::file-selector-button { padding: 8px 12px; border: 1px solid #ccd0d5; border-radius: 4px; background-color: #e4e6eb; cursor: pointer; margin-right: 10px; transition: background-color 0.2s; }
+        input[type="file"]::file-selector-button:hover { background-color: #dcdfe4; }
+        button#saveButton {
+            display: block; width: 100%; padding: 12px 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 600; margin-top: 25px; transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        button#saveButton:hover { background-color: #0056b3; }
+        button#saveButton:active { transform: scale(0.99); }
+        button#saveButton:disabled { background-color: #a0c7e8; cursor: not-allowed; }
+        #canvas { display: none; margin: 20px auto; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 100%; border: 1px solid #ccc; height: auto; border-radius: 4px; }
+        #downloadLink { display: none; margin: 15px auto; padding: 10px 20px; background-color: #28a745; color: white; text-align: center; text-decoration: none; border-radius: 6px; width: fit-content; transition: background-color 0.3s ease; font-weight: 600; font-size: 1.05em; }
+        #downloadLink:hover { background-color: #218838; }
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            label { width: 100%; margin-bottom: 5px; margin-right: 0; }
+            div.input-group { flex-direction: column; align-items: stretch; }
+            input[type="file"], input[type="date"], input[type="time"], input[type="number"] { width: 100%; }
+            h1 { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>V3 Date Time Editor</h1>
+        <div class="input-group">
+            <label for="photoUpload">Photo Upload pannunga:</label>
+            <input type="file" id="photoUpload" accept="image/*">
+        </div>
+        <div class="input-group">
+            <label for="dateInput">Date:</label>
+            <input type="date" id="dateInput">
+        </div>
+        <div class="input-group">
+            <label for="timeInput">Time:</label>
+            <input type="time" id="timeInput">
+        </div>
+        <div class="input-group">
+            <label for="latInput">Latitude:</label>
+            <input type="number" id="latInput" step="any" placeholder="e.g., 13.123456">
+        </div>
+        <div class="input-group">
+            <label for="lonInput">Longitude:</label>
+            <input type="number" id="lonInput" step="any" placeholder="e.g., 80.123456">
+        </div>
+        <button id="saveButton">Data oda Save Pannu</button>
+        <h2>Processed Image:</h2>
+        <canvas id="canvas"></canvas>
+        <a id="downloadLink" style="display: none;">Processed Photo va Download Pannu</a>
+    </div>
+
+    <!-- === UPDATED RED PIN MAP ICON === -->
+    <img id="mapIcon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjRkYwMDAwIj48cGF0aCBkPSJNMTIgMkM4LjEyMiAyIDUgNS4xMjIgNSA5YzAgNS4yNSAxLjUyOSAzLjU4NCA3IDEzIDUuNDcyLTkuNDE2IDctNy43NSA3LTEzIDAtMy44NzgtMy4xMjItNy03LTd6bTAgOS41Yy0xLjM4MSAwLTIuNS0xLjExOS0yLjUtMi41czEuMTE5LTIuNSAyLjUtMi41IDIuNSAxLjExOSAyLjUgMi41LTEuMTE5IDIuNS0yLjUgMi41eiIvPjwvc3ZnPg==" alt="Map Icon" style="display: none;">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const photoUpload = document.getElementById('photoUpload');
+            const dateInput = document.getElementById('dateInput');
+            const timeInput = document.getElementById('timeInput');
+            const latInput = document.getElementById('latInput');
+            const lonInput = document.getElementById('lonInput');
+            const saveButton = document.getElementById('saveButton');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const downloadLink = document.getElementById('downloadLink');
+            const mapIcon = document.getElementById('mapIcon');
+            let uploadedImage = null;
+
+            function formatDate(dateString) {
+                try {
+                    const date = new Date(dateString + 'T00:00:00');
+                    if (isNaN(date)) return dateString;
+                    const optionsDate = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
+                    let formatted = date.toLocaleDateString('en-GB', optionsDate);
+                    const parts = formatted.split(', ');
+                    if (parts.length === 2) return `${parts[0]}, ${parts[1].replace(/\//g, '.')}`;
+                    return formatted;
+                } catch (e) { console.error("Error formatting date:", e); return dateString; }
+            }
+
+            function formatTime(timeString) {
+                try {
+                    const [hours, minutes] = timeString.split(':').map(Number);
+                    if (isNaN(hours) || isNaN(minutes)) return timeString;
+                    const date = new Date(); date.setHours(hours, minutes, 0);
+                    const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: true };
+                    let formatted = date.toLocaleTimeString('en-US', optionsTime);
+                    const timeParts = formatted.split(':');
+                    if (timeParts[0].length === 1 && timeParts[0] !== ' ') timeParts[0] = '0' + timeParts[0];
+                    return timeParts.join(':');
+                } catch (e) { console.error("Error formatting time:", e); return timeString; }
+            }
+
+            function initializeForm() {
+                latInput.value = (13 + Math.random()).toFixed(6);
+                lonInput.value = (80 + Math.random()).toFixed(6);
+                const now = new Date();
+                dateInput.value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+                timeInput.value = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            }
+            initializeForm();
+
+            photoUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImage = new Image();
+                        uploadedImage.onload = () => {
+                            console.log("Image loaded:", uploadedImage.naturalWidth, "x", uploadedImage.naturalHeight); // Log original size
+                            canvas.style.display = 'none'; downloadLink.style.display = 'none'; ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        }
+                        uploadedImage.onerror = () => { alert("Error loading image."); uploadedImage = null; }
+                        uploadedImage.src = e.target.result;
+                    }
+                    reader.onerror = () => { alert("Error reading file."); uploadedImage = null; }
+                    reader.readAsDataURL(file);
+                } else {
+                    uploadedImage = null; canvas.style.display = 'none'; downloadLink.style.display = 'none';
+                }
+            });
+
+            saveButton.addEventListener('click', () => {
+                if (!uploadedImage || !uploadedImage.complete || uploadedImage.naturalWidth === 0) { alert("Mudhalla oru photo va upload pannunga!"); return; }
+                if (!dateInput.value || !timeInput.value) { alert("Date matrum Time enter pannunga!"); return; }
+                const lat = parseFloat(latInput.value); const lon = parseFloat(lonInput.value);
+                if (latInput.value === '' || lonInput.value === '' || isNaN(lat) || isNaN(lon)) { alert("Latitude matrum Longitude correct ah enter pannunga!"); return; }
+
+                saveButton.disabled = true; saveButton.textContent = 'Processing...';
+                canvas.style.display = 'none'; downloadLink.style.display = 'none';
+
+                setTimeout(() => {
+                    try {
+                        // === Set canvas size to original image size ===
+                        canvas.width = uploadedImage.naturalWidth;
+                        canvas.height = uploadedImage.naturalHeight;
+                        // ============================================
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height); // Draw image at original size
+
+                        const formattedDateStr = formatDate(dateInput.value); const formattedTimeStr = formatTime(timeInput.value);
+                        const latStr = `Latitude ${lat.toFixed(6)}°`; const lonStr = `Longitude ${lon.toFixed(6)}°`;
+
+                        const baseFontSize = Math.max(14, Math.min(canvas.width * 0.025, 30));
+                        const padding = baseFontSize * 0.8; const lineSpacing = baseFontSize * 0.4;
+                        const textLineHeight = baseFontSize * 1.2;
+                        const barHeight = (textLineHeight * 2) + (lineSpacing * 1) + (padding * 2);
+                        const barY = canvas.height - barHeight;
+
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                        ctx.fillRect(0, barY, canvas.width, barHeight);
+
+                        ctx.fillStyle = '#FFFFFF'; ctx.font = `${baseFontSize}px Arial, sans-serif`; ctx.textBaseline = 'top';
+                        const textYLine1 = barY + padding; const textYLine2 = textYLine1 + textLineHeight + lineSpacing; const textXLeft = padding;
+
+                        ctx.fillText(latStr, textXLeft, textYLine1);
+                        const latTextWidth = ctx.measureText(latStr).width;
+                        ctx.fillText(lonStr, textXLeft + latTextWidth + padding * 2, textYLine1);
+
+                        ctx.fillText(formattedTimeStr, textXLeft, textYLine2);
+                        const timeTextWidth = ctx.measureText(formattedTimeStr).width;
+                        ctx.fillText(formattedDateStr, textXLeft + timeTextWidth + padding * 2, textYLine2);
+
+                        const iconSize = baseFontSize * 1.8;
+                        const iconX = canvas.width - iconSize - padding;
+                        const iconY = barY + (barHeight - iconSize) / 2;
+                        if (mapIcon && mapIcon.complete && mapIcon.naturalWidth > 0 && mapIcon.naturalHeight > 0) {
+                           try {
+                                ctx.drawImage(mapIcon, iconX, iconY, iconSize, iconSize); // Drawing the new red pin icon
+                                console.log("Map icon drawn successfully.");
+                            } catch (drawError) {
+                                console.error("Error drawing map icon:", drawError);
+                                ctx.fillStyle = 'orange'; ctx.fillRect(iconX, iconY, iconSize, iconSize); ctx.fillStyle = 'black'; ctx.fillText('X', iconX + iconSize/3, iconY + iconSize*0.8);
+                            }
+                        } else {
+                            console.warn("Map icon not loaded or invalid. Drawing fallback.");
+                            ctx.fillStyle = 'red'; ctx.fillRect(iconX, iconY, iconSize, iconSize); ctx.fillStyle = 'white'; ctx.fillText('!', iconX + iconSize/3, iconY + iconSize*0.8);
+                        }
+
+                        const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+                        downloadLink.href = dataURL;
+                        downloadLink.download = `V3_${dateInput.value}_${timeInput.value.replace(':', '-')}.jpg`;
+
+                        canvas.style.display = 'block'; downloadLink.style.display = 'block';
+                    } catch (error) {
+                        console.error("Error processing image:", error);
+                        alert(`An error occurred: ${error.message}. Check console for details.`);
+                        canvas.style.display = 'none'; downloadLink.style.display = 'none';
+                    } finally {
+                        saveButton.disabled = false; saveButton.textContent = 'Data oda Save Pannu';
+                    }
+                }, 50);
+            });
+        });
+    </script>
+</body>
+</html>
